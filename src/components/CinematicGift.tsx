@@ -103,6 +103,74 @@ const STORY: Step[] = [
   { type: "flash" },
 ];
 
+// Birthday countdown: 0 → 27, then "1" flies in and kicks out "7", making it "21"
+function BirthdayCountdown() {
+  const [count, setCount] = useState(0);
+  const [phase, setPhase] = useState<"counting" | "show27" | "attack" | "done">("counting");
+
+  useEffect(() => {
+    if (phase !== "counting") return;
+    if (count >= 27) {
+      setPhase("show27");
+      setTimeout(() => setPhase("attack"), 1200);
+      return;
+    }
+    const speed = count < 10 ? 80 : count < 20 ? 60 : 40;
+    const t = setTimeout(() => setCount(count + 1), speed);
+    return () => clearTimeout(t);
+  }, [count, phase]);
+
+  useEffect(() => {
+    if (phase === "attack") {
+      setTimeout(() => setPhase("done"), 800);
+    }
+  }, [phase]);
+
+  return (
+    <motion.div
+      className="flex items-center justify-center mt-2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { delay: 1.6 } }}
+    >
+      <div className="relative" style={{ fontFamily: "Caveat, cursive", fontSize: "clamp(48px, 10vw, 80px)", color: "#C76F4A", fontWeight: 700, textShadow: "0 4px 20px rgba(199,111,74,0.4)" }}>
+        {phase === "counting" && <span>{count}</span>}
+        {phase === "show27" && <span>27</span>}
+        {phase === "attack" && (
+          <span className="relative inline-flex">
+            <span>2</span>
+            <span className="relative">
+              <motion.span
+                className="absolute inset-0"
+                initial={{ x: 60, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.4, ease: "easeIn" }}
+              >
+                1
+              </motion.span>
+              <motion.span
+                initial={{ x: 0, opacity: 1 }}
+                animate={{ x: 80, opacity: 0, rotate: 45 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                7
+              </motion.span>
+            </span>
+          </span>
+        )}
+        {phase === "done" && (
+          <motion.span
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+          >
+            21
+          </motion.span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 // Auto-advance helper — fires onDone after duration ms (if set)
 function AutoAdvance({ duration, onDone }: { duration?: number; onDone: () => void }) {
   useEffect(() => {
@@ -267,8 +335,11 @@ export function CinematicGift() {
               </motion.h1>
               <motion.div className="h-0.5 w-48" style={{ background: "linear-gradient(90deg, rgba(199,111,74,0) 0%, #C76F4A 50%, rgba(199,111,74,0) 100%)" }} initial={{ scaleX: 0 }} animate={{ scaleX: 1, transition: { delay: 0.9, duration: 0.5 } }} />
               <motion.p style={{ fontFamily: "Caveat, cursive", color: "rgba(250,247,242,0.85)", fontSize: "clamp(20px, 3vw, 28px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 1.1 } }}>
-                {GIFT_SUBTITLE}
               </motion.p>
+              <motion.p style={{ fontFamily: "Caveat, cursive", color: "rgba(250,247,242,0.7)", fontSize: "clamp(16px, 2.5vw, 22px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 1.3 } }}>
+                Happy...
+              </motion.p>
+              <BirthdayCountdown />
               <motion.button onClick={startJourney} className="mt-8 rounded-full px-8 py-3 text-sm font-bold text-white shadow-lg" style={{ background: "#C76F4A" }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: 1.4 } }} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 Wyrusz na przygodę
               </motion.button>
