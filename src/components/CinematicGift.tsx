@@ -62,7 +62,7 @@ const STORY: Step[] = [
   // Image 1 — NYE
   { type: "photo", photoIndex: findPhoto("20191231_234723_144 (1)"), caption: "Grudniowy wieczór" },
   // Family growing
-  { type: "text", text: "Od tamtego czasu nasza rodzina\nzaczęła rosnąć...", duration: 3000 },
+  { type: "text", text: "Od tamtego czasu trochę się zmieniło...", duration: 3000 },
   // Image 2 — First cat
   { type: "photo", photoIndex: findPhoto("Snapchat-1358228142"), caption: "Od pierwszego dziecka" },
   // Image 3 — Second cat
@@ -164,7 +164,7 @@ export function CinematicGift() {
       setIntroText("");
       startDateRoulette(first.date, () => {
         // After date lands, show "Pierwszy wspólny wypad na miasto..."
-        setIntroText("Pierwszy wspólny wypad na miasto...");
+        setIntroText("Nasz pierwszy wspólny wypad na miasto...");
         setTimeout(() => {
           setIntroText("");
           setStepIndex(0);
@@ -354,11 +354,6 @@ export function CinematicGift() {
                   {currentStep.caption && (
                     <p className="text-center" style={{ fontFamily: "Caveat, cursive", fontSize: "22px", color: "rgba(250,247,242,0.8)" }}>
                       {currentStep.caption}
-                    </p>
-                  )}
-                  {allPhotos[currentStep.photoIndex] && (
-                    <p className="text-center text-sm" style={{ color: "rgba(250,247,242,0.5)" }}>
-                      {new Date(allPhotos[currentStep.photoIndex].date).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
                   )}
                 </motion.div>
