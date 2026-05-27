@@ -223,27 +223,6 @@ export function CinematicGift() {
     }, 120);
   }, []);
 
-  // Slot machine — "więcej: ..." cycling words
-  const SLOT_WORDS = [
-    "miłości", "pieniędzy", "szczęścia", "zdrowia", "przygód",
-    "śmiechu", "słońca", "wakacji", "kotów", "pizzy",
-    "uścisków", "tańców", "marzeń", "niespodzianek", "radości",
-    "pocałunków", "kawy", "czekolady", "wspólnych chwil", "szaleństw",
-    "podróży", "zachwytu", "spokoju", "energii", "inspiracji",
-  ];
-
-  const runSlotMachine = useCallback(() => {
-    setSlotActive(true);
-    let i = 0;
-    const interval = setInterval(() => {
-      setSlotWord(SLOT_WORDS[i % SLOT_WORDS.length]);
-      i++;
-    }, 200);
-    // Keep it running — user watches it spin
-    // Store interval to clean up
-    return () => clearInterval(interval);
-  }, []);
-
   // No photos guard
   if (allPhotos.length === 0) {
     return (
