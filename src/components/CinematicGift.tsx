@@ -148,32 +148,40 @@ export function CinematicGift() {
     return () => { map.remove(); mapRef.current = null; };
   }, []);
 
+  const [shootTriggered, setShootTriggered] = useState(false);
+  const [giftStep, setGiftStep] = useState<"none" | "buttons" | "nie-tak-szybko" | "remont-text" | "prezent1" | "prezent2-tease">("none");
+
   // Start the journey — fly to Luton + intro sequence
   const startJourney = useCallback(() => {
-    setStarted(true);
-    const map = mapRef.current;
-    const first = allPhotos[0];
-    if (!map || !first) { setStepIndex(0); return; }
-
-    map.flyTo({ center: [first.lng, first.lat], zoom: 12, duration: 2500, essential: true });
-
-    // Show "tutaj wszystko się zaczęło..."
+    // First trigger the shoot animation
+    setShootTriggered(true);
+    // Wait for the animation to finish (~5s) before starting the journey
     setTimeout(() => {
-      setIntroText("tutaj wszystko się zaczęło...");
-    }, 2300);
+      setStarted(true);
+      const map = mapRef.current;
+      const first = allPhotos[0];
+      if (!map || !first) { setStepIndex(0); return; }
 
-    // After 2.5s, start date roulette
-    setTimeout(() => {
-      setIntroText("");
-      startDateRoulette(first.date, () => {
-        // After date lands, show "Pierwszy wspólny wypad na miasto..."
-        setIntroText("Nasz pierwszy wspólny wypad na miasto...");
-        setTimeout(() => {
-          setIntroText("");
-          setStepIndex(0);
-        }, 2500);
-      });
-    }, 4800);
+      map.flyTo({ center: [first.lng, first.lat], zoom: 12, duration: 2500, essential: true });
+
+      setTimeout(() => {
+        setIntroText("tutaj wszystko się zaczęło...");
+      }, 2300);
+
+      setTimeout(() => {
+        setIntroText("");
+        startDateRoulette(first.date, () => {
+          setIntroText("Jak się poznaliśmy miałaś 20 lat...");
+          setTimeout(() => {
+            setIntroText("Nasz pierwszy wspólny wypad na miasto...");
+            setTimeout(() => {
+              setIntroText("");
+              setStepIndex(0);
+            }, 2500);
+          }, 2800);
+        });
+      }, 4800);
+    }, 5500);
   }, []);
 
   const startDateRoulette = useCallback((targetDate: string, onDone: () => void) => {
@@ -261,7 +269,7 @@ export function CinematicGift() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.6 } }}
           >
-            <div className="flex flex-col items-center gap-4 text-center px-6">
+            <div className="flex flex-col items-center gap-1 text-center px-6">
               <motion.p style={{ fontFamily: "Caveat, cursive", color: "rgba(250,247,242,0.7)", fontSize: "18px" }} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0.3 } }}>
                 dla Darii Krejzolki
               </motion.p>
@@ -271,10 +279,12 @@ export function CinematicGift() {
               <motion.div className="h-0.5 w-48" style={{ background: "linear-gradient(90deg, rgba(199,111,74,0) 0%, #C76F4A 50%, rgba(199,111,74,0) 100%)" }} initial={{ scaleX: 0 }} animate={{ scaleX: 1, transition: { delay: 0.9, duration: 0.5 } }} />
               <motion.p style={{ fontFamily: "Caveat, cursive", color: "rgba(250,247,242,0.85)", fontSize: "clamp(20px, 3vw, 28px)" }} initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 1.1 } }}>
               </motion.p>
-              <BirthdayCountdown />
-              <motion.button onClick={startJourney} className="mt-8 rounded-full px-8 py-3 text-sm font-bold text-white shadow-lg" style={{ background: "#C76F4A" }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: 1.4 } }} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                Wyrusz na przygodę
-              </motion.button>
+              <BirthdayCountdown triggerShoot={shootTriggered} />
+              {!shootTriggered && (
+                <motion.button onClick={startJourney} className="mt-4 rounded-full px-8 py-3 text-sm font-bold text-white shadow-lg" style={{ background: "#C76F4A" }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, transition: { delay: 1.4 } }} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  Wyrusz na przygodę
+                </motion.button>
+              )}
             </div>
           </motion.div>
         )}
@@ -408,6 +418,193 @@ export function CinematicGift() {
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1, transition: { delay: 1.8, duration: 0.5 } }}
               />
+              {giftStep === "none" && (
+                <motion.button
+                  onClick={() => setGiftStep("buttons")}
+                  className="mt-6 rounded-full px-6 py-2.5 text-sm font-bold text-white shadow-lg"
+                  style={{ background: "#C76F4A" }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0, transition: { delay: 2.5 } }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Pokaż w końcu ten prezent...
+                </motion.button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Gift reveal — two prezent buttons */}
+      <AnimatePresence>
+        {giftStep === "buttons" && (
+          <motion.div
+            key="gift-buttons"
+            className="fixed inset-0 z-[60] flex items-center justify-center"
+            style={{ background: "rgba(14,10,8,0.85)", backdropFilter: "blur(10px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.5 } }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="flex flex-col items-center gap-6 px-6">
+              <motion.p
+                style={{ fontFamily: "Caveat, cursive", color: "#FAF7F2", fontSize: "clamp(28px, 5vw, 44px)", textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.4 } }}
+              >
+                Który najpierw?
+              </motion.p>
+              <div className="flex gap-4 flex-wrap justify-center">
+                <motion.button
+                  onClick={() => setGiftStep("remont-text")}
+                  className="rounded-full px-8 py-3 text-base font-bold text-white shadow-lg"
+                  style={{ background: "#C76F4A" }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1, transition: { delay: 0.3 } }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  🎁 Prezent 1
+                </motion.button>
+                <motion.button
+                  onClick={() => setGiftStep("nie-tak-szybko")}
+                  className="rounded-full px-8 py-3 text-base font-bold text-white shadow-lg"
+                  style={{ background: "rgba(74,66,56,0.8)" }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1, transition: { delay: 0.5 } }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  🎁 Prezent 2
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {giftStep === "nie-tak-szybko" && (
+          <motion.div
+            key="nie-tak-szybko"
+            className="fixed inset-0 z-[60] flex items-center justify-center cursor-pointer"
+            style={{ background: "rgba(14,10,8,0.85)", backdropFilter: "blur(10px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.5 } }}
+            exit={{ opacity: 0 }}
+            onClick={() => setGiftStep("buttons")}
+          >
+            <div className="text-center px-6">
+              <motion.p
+                style={{ fontFamily: "Caveat, cursive", color: "#FAF7F2", fontSize: "clamp(32px, 6vw, 56px)", textShadow: "0 4px 20px rgba(0,0,0,0.5)", lineHeight: 1.3 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.5 } }}
+              >
+                Nie tak szybko!{"\n"}
+                Najpierw pierwszy! 😂
+              </motion.p>
+              <AutoAdvance duration={3000} onDone={() => setGiftStep("buttons")} />
+            </div>
+          </motion.div>
+        )}
+
+        {giftStep === "remont-text" && (
+          <motion.div
+            key="remont-text"
+            className="fixed inset-0 z-[60] flex items-center justify-center cursor-pointer"
+            style={{ background: "rgba(14,10,8,0.85)", backdropFilter: "blur(10px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.5 } }}
+            exit={{ opacity: 0 }}
+            onClick={() => setGiftStep("prezent1")}
+          >
+            <div className="text-center px-6">
+              <motion.p
+                style={{ fontFamily: "Caveat, cursive", color: "#FAF7F2", fontSize: "clamp(28px, 5vw, 44px)", textShadow: "0 4px 20px rgba(0,0,0,0.5)", lineHeight: 1.4 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.6 } }}
+              >
+                Remont się skończył...{"\n"}
+                Ale zawsze jest dobry czas...{"\n"}
+                By pobawić się farbą! 🎨
+              </motion.p>
+              <AutoAdvance duration={4500} onDone={() => setGiftStep("prezent1")} />
+            </div>
+          </motion.div>
+        )}
+
+        {giftStep === "prezent1" && (
+          <motion.div
+            key="prezent1"
+            className="fixed inset-0 z-[60] flex items-center justify-center"
+            style={{ background: "rgba(14,10,8,0.92)", backdropFilter: "blur(12px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.6 } }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="flex flex-col items-center gap-4 px-4 w-full" style={{ maxWidth: "min(90vw, 800px)" }}>
+              <motion.div
+                className="overflow-hidden rounded-2xl shadow-2xl bg-white"
+                style={{ width: "100%", height: "min(70vh, 700px)" }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, transition: { type: "spring", damping: 20, stiffness: 150 } }}
+              >
+                <iframe
+                  src={withBase("/Prezent_1.pdf")}
+                  className="w-full h-full border-0"
+                  title="Prezent 1"
+                />
+              </motion.div>
+              <motion.button
+                onClick={() => setGiftStep("prezent2-tease")}
+                className="rounded-full px-6 py-2.5 text-sm font-bold text-white shadow-lg"
+                style={{ background: "#C76F4A" }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.8 } }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Jest jeszcze drugi prezent!
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+
+        {giftStep === "prezent2-tease" && (
+          <motion.div
+            key="prezent2-tease"
+            className="fixed inset-0 z-[60] flex items-center justify-center"
+            style={{ background: "rgba(14,10,8,0.9)", backdropFilter: "blur(12px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.6 } }}
+          >
+            <div className="text-center px-6 flex flex-col items-center gap-3">
+              <motion.p
+                style={{ fontFamily: "Caveat, cursive", color: "rgba(250,247,242,0.7)", fontSize: "clamp(20px, 3vw, 28px)" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { delay: 0.3 } }}
+              >
+                Część druga nastąpi...
+              </motion.p>
+              <motion.p
+                style={{ fontFamily: "Caveat, cursive", color: "#FAF7F2", fontSize: "clamp(40px, 8vw, 72px)", textShadow: "0 4px 28px rgba(0,0,0,0.55)" }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1, transition: { delay: 0.6, type: "spring", damping: 15 } }}
+              >
+                30 / 05 / 2026
+              </motion.p>
+              <motion.div
+                className="h-0.5 w-48"
+                style={{ background: "linear-gradient(90deg, rgba(199,111,74,0) 0%, #C76F4A 50%, rgba(199,111,74,0) 100%)" }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1, transition: { delay: 1.2, duration: 0.5 } }}
+              />
+              <motion.p
+                style={{ fontFamily: "Caveat, cursive", color: "rgba(250,247,242,0.6)", fontSize: "clamp(18px, 2.5vw, 24px)" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { delay: 1.5 } }}
+              >
+                Stay tuned ✨
+              </motion.p>
             </div>
           </motion.div>
         )}
