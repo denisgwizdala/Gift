@@ -34,6 +34,13 @@ function applyCream(map: maplibregl.Map) {
 // Filter photos with GPS
 const allPhotos = PHOTOS.filter((p) => p.lat != null && p.lng != null && p.lat !== 0 && p.lng !== 0);
 
+// Base path for GitHub Pages (set via env during build)
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+function withBase(src: string): string {
+  return BASE_PATH + src;
+}
+
 // ============================================================
 // SCRIPTED STORY SEQUENCE
 // Each step is either a "text" overlay, a "photo" reveal, or a "flash" sequence
@@ -332,7 +339,7 @@ export function CinematicGift() {
                 >
                   <div className="overflow-hidden rounded-2xl shadow-2xl" style={{ maxWidth: "min(82vw, 540px)", maxHeight: "min(45vh, 400px)" }}>
                     <img
-                      src={allPhotos[currentStep.photoIndex]?.src}
+                      src={withBase(allPhotos[currentStep.photoIndex]?.src)}
                       alt={currentStep.caption}
                       className="h-full w-full object-cover"
                       style={{ maxHeight: "min(45vh, 400px)" }}
@@ -366,7 +373,7 @@ export function CinematicGift() {
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: flashImages[0] === "__flash__" ? "#fff" : "rgba(14,10,8,0.5)", backdropFilter: "blur(2px)" }}>
           {flashImages[0] && flashImages[0] !== "__flash__" && (
             <div className="overflow-hidden rounded-2xl shadow-2xl" style={{ maxWidth: "min(82vw, 540px)", maxHeight: "52vh" }}>
-              <img src={flashImages[0]} className="h-full w-full object-cover" style={{ maxHeight: "52vh" }} alt="" />
+              <img src={withBase(flashImages[0])} className="h-full w-full object-cover" style={{ maxHeight: "52vh" }} alt="" />
             </div>
           )}
         </div>
